@@ -40,12 +40,18 @@ public protocol DragulaSection: Identifiable {
 public protocol DragulaItem: Identifiable {
     /// Override to provide a meaningful item provider for drag sessions.
     func getItemProvider() -> NSItemProvider
+    /// Changes whenever *any* visible part of the card changes.
+    var changeToken: String? { get }
 }
 
 extension DragulaItem {
     /// Default implementation returns an empty item provider.
     public func getItemProvider() -> NSItemProvider {
         .init()
+    }
+
+    public var changeToken: String? {
+        nil
     }
 }
 
@@ -201,6 +207,7 @@ public struct DragulaView<Card: View, DropView: View, Item: DragulaItem>: View {
     @Binding var items: [Item]
     private let card: (Item) -> Card
     private let dropView: ((Item) -> DropView)?
+    private let dragWillBegin: () -> Void
     private let dropCompleted: () -> Void
     
     private let supportedUTTypes: [UTType] = []
@@ -215,11 +222,13 @@ public struct DragulaView<Card: View, DropView: View, Item: DragulaItem>: View {
         items: Binding<[Item]>,
         @ViewBuilder card: @escaping (Item) -> Card,
         @ViewBuilder dropView: @escaping (Item) -> DropView,
+        dragWillBegin: @escaping () -> Void = {},
         dropCompleted: @escaping () -> Void
     ) {
         self._items = items
         self.card = card
         self.dropView = dropView
+        self.dragWillBegin = dragWillBegin
         self.dropCompleted = dropCompleted
     }
     
@@ -239,11 +248,13 @@ public struct DragulaView<Card: View, DropView: View, Item: DragulaItem>: View {
                         }, itemProvider: {
                             item.getItemProvider()
                         }, onDragWillBegin: {
+                            self.dragWillBegin()
                             self.draggedItems.append(item)
                         }, onDragWillEnd: {
                             self.draggedItems = []
                             self.dropCompleted()
                         })
+                    .id(item.changeToken ?? "\(item.id)")
                 }
                 .onDrop(
                     of: supportedUTTypes,

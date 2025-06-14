@@ -19,8 +19,8 @@ import UIKit
 ///   - itemProvider: Provides the data for the drag session.
 ///   - onDragWillBegin: Called when a drag is about to begin.
 ///   - onDragWillEnd: Called when the drag session ends.
-struct DraggableView<Preview: View, DropView: View>: UIViewRepresentable {
-    
+public struct DraggableView<Preview: View, DropView: View>: UIViewRepresentable {
+
     @Environment(\.dragPreviewCornerRadius) private var dragPreviewCornerRadius
     
     private let itemProvider: () -> NSItemProvider
@@ -36,7 +36,7 @@ struct DraggableView<Preview: View, DropView: View>: UIViewRepresentable {
     ///   - itemProvider: Closure to provide the drag item.
     ///   - onDragWillBegin: Called before drag starts.
     ///   - onDragWillEnd: Called when drag ends.
-    init(
+    public init(
         @ViewBuilder preview: @escaping () -> Preview,
         @ViewBuilder dropView: @escaping () -> DropView,
         itemProvider: @escaping () -> NSItemProvider,
@@ -50,7 +50,7 @@ struct DraggableView<Preview: View, DropView: View>: UIViewRepresentable {
         self.onDragWillEnd = onDragWillEnd
     }
 
-    func makeUIView(context: Context) -> DraggableUIView {
+    public func makeUIView(context: Context) -> DraggableUIView {
         let uiPreview = UIHostingController(rootView: preview()).view!
         uiPreview.backgroundColor = .clear
         let uiDropView = UIHostingController(rootView: dropView()).view!
@@ -67,12 +67,12 @@ struct DraggableView<Preview: View, DropView: View>: UIViewRepresentable {
         return draggableView
     }
 
-    func updateUIView(_ uiView: DraggableUIView, context: Context) {
+    public func updateUIView(_ uiView: DraggableUIView, context: Context) {
         uiView.dragPreviewCornerRadius = dragPreviewCornerRadius
     }
 }
 
-extension DraggableView {
+public extension DraggableView {
     final class DraggableUIView: UIView, UIDragInteractionDelegate {
         var dragPreviewCornerRadius: CGFloat = .zero
         private let previewView: UIView
@@ -123,7 +123,7 @@ extension DraggableView {
             fatalError("init(coder:) has not been implemented")
         }
         
-        func dragInteraction(
+        public func dragInteraction(
             _ interaction: UIDragInteraction,
             itemsForBeginning session: UIDragSession
         ) -> [UIDragItem] {
@@ -132,7 +132,7 @@ extension DraggableView {
             return [UIDragItem(itemProvider: itemProvider)]
         }
         
-        func dragInteraction(
+        public func dragInteraction(
             _ interaction: UIDragInteraction,
             itemsForAddingTo session: any UIDragSession,
             withTouchAt point: CGPoint
@@ -142,7 +142,7 @@ extension DraggableView {
             return [UIDragItem(itemProvider: itemProvider)]
         }
         
-        func dragInteraction(
+        public func dragInteraction(
             _ interaction: UIDragInteraction,
             previewForLifting item: UIDragItem,
             session: UIDragSession
@@ -165,7 +165,7 @@ extension DraggableView {
             return UITargetedDragPreview(view: previewView, parameters: parameters, target: target)
         }
         
-        func dragInteraction(
+        public func dragInteraction(
             _ interaction: UIDragInteraction,
             willAnimateLiftWith animator: any UIDragAnimating,
             session: any UIDragSession
@@ -176,12 +176,9 @@ extension DraggableView {
                 self?.previewView.alpha = .zero
                 self?.dropIndicatorView.alpha = 1
             }
-            animator.addCompletion { [weak self] test in
-                self?.previewView.isHidden = true
-            }
         }
         
-        func dragInteraction(
+        public func dragInteraction(
             _ interaction: UIDragInteraction,
             previewForCancelling item: UIDragItem,
             withDefault defaultPreview: UITargetedDragPreview
@@ -201,14 +198,14 @@ extension DraggableView {
             )
         }
         
-        func dragInteraction(
+        public func dragInteraction(
             _ interaction: UIDragInteraction,
             prefersFullSizePreviewsFor session: any UIDragSession
         ) -> Bool {
             true
         }
         
-        func dragInteraction(
+        public func dragInteraction(
             _ interaction: UIDragInteraction,
             item: UIDragItem,
             willAnimateCancelWith animator: UIDragAnimating
@@ -224,7 +221,7 @@ extension DraggableView {
             }
         }
         
-        func dragInteraction(
+        public func dragInteraction(
             _ interaction: UIDragInteraction,
             session: UIDragSession,
             willEndWith operation: UIDropOperation
@@ -232,7 +229,7 @@ extension DraggableView {
             onDragWillEnd?()
         }
         
-        func dragInteraction(
+        public func dragInteraction(
             _ interaction: UIDragInteraction,
             sessionIsRestrictedToDraggingApplication session: any UIDragSession
         ) -> Bool {
